@@ -1,0 +1,14 @@
+{
+    "com.tlantic.plugins.socket": {
+        "source": {
+            "type": "registry",
+            "id": "com.tlantic.plugins.socket"
+        }
+    },
+    "cz.blocshop.socketsforcordova": {
+        "source": {
+            "type": "registry",
+            "id": "cz.blocshop.socketsforcordova"
+        }
+    }
+}

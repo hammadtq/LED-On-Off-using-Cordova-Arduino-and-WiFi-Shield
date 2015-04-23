@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, user-scalable=no
+		initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+
+	<title>Arduino LED On/Off BLE</title>
+
+	<style>
+		@import 'ui/css/evothings-app.css';
+	</style>
+
+	<script>
+	// Redirect console.log to Evothings Workbench.
+	if (window.hyper && window.hyper.log) { console.log = hyper.log }
+	window.onerror = function(msg, url, line)
+	{
+		console.log(msg + ": " + url + ":" + line);
+	};
+	</script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name = "format-detection" content = "telephone=no"/>
+        <!--
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width;" />
+        -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+        <title>Light Control</title>
+        <script src="js/jquery-1.9.1.min.js"></script>
+
+    </head>
+     <body ontouchstart=""><!-- ontouchstart="" enables low-delay CSS transitions. -->
+
+	<header>
+		<button class="back" onclick="history.back()">
+			<img src="ui/images/arrow-left.svg" />
+		</button>
+
+		<img class="logotype" src="ui/images/logo.svg" alt="Evothings" />
+
+		<!--<button class="menu" onclick=""><img src="ui/images/menu.svg" /></button>-->
+	</header>
+        <div class="app">
+            <h1>Connected Cable Extension</span></h1>
+
+            <div id="menu">
+            <button class="green wide" onclick="connectToHost('192.168.1.100', 4000)">Connect</button>
+            </div>
+            <div id="console">
+                <button class="green wide" onclick="sendCommand('a')">Light ON</button>
+
+				<br />
+
+				<button class="red wide" onclick="sendCommand('b')">Light OFF</button>
+
+            
+               <button class="yellow wide" id="disconnectButton" onclick="setDisconnected()">Disconnect</button>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript">
+            var socket;
+
+            document.addEventListener("deviceready", function() {
+                hideButtons();
+            });
+
+            
+            function connectToCustomHost() {
+                var host = document.getElementById("host").value;
+                var port = document.getElementById("port").value;
+
+                if (host == "" || port == "") {
+                    alert("Host and port cannot be empty.");
+                }
+                else {
+                    connectToHost(host, parseInt(port));
+                }
+            }
+
+
+            function connectToHost(host, port) {
+                window.socket = new Socket();
+                window.socket.onData = receiveData;
+                window.socket.onError = function(errorMessage) {
+                    alert("Error occured, error: " + errorMessage);
+                };
+                window.socket.onClose = function(hasError) {
+                    alert("Connection closed");
+                    setDisconnected();
+                };
+                window.socket.open(
+                        host,
+                        port,
+                        setConnected,
+                        function(errorMessage) {
+                            alert("Error during connection, error: " + errorMessage);
+                        });
+            }
+
+
+            function addTextToOutputElement(text) {
+                var dataOutput = document.getElementById("data-output");
+                var line = document.createElement("li");
+                line.innerText = text;
+                dataOutput.appendChild(line);
+                dataOutput.scrollTop = dataOutput.scrollHeight;
+            }
+
+            function receiveData(data) {
+                var chars = new Array(data.length);
+                for (var i = 0; i < data.length; i++) {
+                    chars.push(String.fromCharCode(data[i]));
+                }
+                var dataString = chars.join("");
+                dataString.split(/(?:\r\n|\r|\n)/g).forEach(addTextToOutputElement);
+            }
+
+            function sendCommand(command) {
+                    var bytes = new Uint8Array(command.length + 1);
+                    for (var i = 0; i < command.length; i++) {
+                        bytes[i] = command.charCodeAt(i);
+                    }
+                    bytes[command.length] = "\n".charCodeAt(0);
+                    socket.write(bytes);
+                    input.value = "";
+            }
+
+            function setConnected() {
+                var menuEl = document.getElementById("menu");
+                menuEl.style.display = "none";
+
+                var consoleEl = document.getElementById("console");
+                consoleEl.style.display = "block";
+            }
+            function setDisconnected() {
+            	window.socket.close();
+            	hideButtons();
+            }
+            
+            function hideButtons(){
+            	var menuEl = document.getElementById("menu");
+                menuEl.style.display = "block";
+
+                var consoleEl = document.getElementById("console");
+                consoleEl.style.display = "none";
+            }
+            
+        </script>
+    </body>
+</html>
